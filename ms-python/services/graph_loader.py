@@ -44,3 +44,28 @@ def build_graph(data):
             "max_transfer_mw": edge["max_transfer_mw"],
             "available": edge["available"],
         }
+
+        graph[plant_a].append(edge_info_a_to_b)
+
+        if edge.get("bidirectional", True):
+            graph[plant_b].append(edge_info_b_to_a)
+
+    return graph
+
+
+def build_plants_index(data):
+    """Dictionnaire {plant_id: plant_dict}, utile pour les étapes suivantes."""
+    return {plant["id"]: plant for plant in data["plants"]}
+
+
+def build_regions_index(data):
+    """Pareil que build_plants_index, mais pour les régions."""
+    return {region["id"]: region for region in data["regions"]}
+
+
+if __name__ == "__main__":
+    data = load_data()
+    graph = build_graph(data)
+
+    print(f"Nombre de centrales dans le graphe : {len(graph)}")
+    print(f"Voisins de golfech : {graph['golfech']}")
