@@ -1,14 +1,20 @@
 <!-- CONTRIBUTING.md -->
+# Guide de contribution au projet EnergIA
 
-# Comment contribuer au projet
+Nous encourageons toute contribution en suivant les directives suivantes :
 
-## Branches
+## Branches de Travail
 
-Il existe une branche dev qui accueillera les contributions fonctionnelles par fusion
-depuis les branches spécifiques aux micro-services : nodeAPI et pythonAPI
+Toutes les nouvelles fonctionnalités doivent être développées sur des branches spécifiques aux micro-services (```nodeAPI``` ou ```pythonAPI```) puis fusionnées dans la branche principale ```dev```. Les tests sont effectués sur ```dev``` avant mise en production sur ```main```.
 
-## Commits
+## Conventions de Commit
 
-On étiquette le commit avec une mention ```
-	<feat>, <fix>, <doc>, <devops>```
-en fonction des modifications apportées par le commit
+L'usage d'étiquettes est obligatoire pour classer le type de modification :
+
+```<feat>```: Nouvelle fonctionnalité.
+
+```<fix>```: Correction de bug.
+
+```<doc>```: Mise à jour documentaire (dans un fichier .md).
+
+```<devops>```: Changement lié au déploiement, infrastructure ou CI/CD.
