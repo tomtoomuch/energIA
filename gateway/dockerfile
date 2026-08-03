@@ -3,6 +3,6 @@
 FROM node:24-alpine
 WORKDIR /gateway
 COPY . .
-RUN npm install --omit=dev
+RUN npm install
 CMD ["npm", "run", "dev"]
 EXPOSE 3000
