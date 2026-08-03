@@ -1,8 +1,6 @@
 
 
-
-
-graph_loader.py
+ ms-python/services/ graph_loader.py
     Ce fichier transforme les données brutes du JSON (centrales, liaisons) en une structure que le programme peut utiliser facilement pour calculer des chemins — un graphe
     
     
@@ -26,7 +24,7 @@ graph_loader.py
     lancer python graph_loader.py
 
 
-dijkstra.py
+ ms-python/services/dijkstra.py
     Ce fichier trouve le chemin le moins cher entre deux centrales, en passant par le réseau de liaisons — c'est
     l'algorithme de Dijkstra, qu'on a écrit nous-mêmes sans bibliothèque
     
@@ -43,3 +41,24 @@ dijkstra.py
     (sinon on connaît juste la distance, pas le trajet).
     visited : les centrales déjà "réglées", pour ne pas repasser dessus inutilement.
 
+ms-python/services/capacity.py
+    Ce fichier calcule combien de MW en plus chaque centrale peut encore produire, 
+    avant d'atteindre sa limite de sécurité.
+    
+    chaque centrale a une limite haute qu'elle ne doit jamais dépasser (soft_upper_bound_mw, 
+    fixée à 95% de sa puissance installée — une marge de sécurité).
+    Elle a aussi une production actuelle (initial_output_mw). La différence entre les deux, c'est ce qu'elle
+    peut encore donner : marge = limite − production actuelle.
+    
+    Pourquoi on garde ramp_limit séparée : une centrale peut avoir beaucoup de marge (par exemple 600 MW),
+    mais elle ne peut pas monter en puissance instantanément — elle a une vitesse maximale de montée par tranche de 
+    15 minutes (max_ramp_up_mw_per_15_min). On garde cette info à part pour l'instant, parce qu'elle servira plus 
+    tard, quand on répartira vraiment la demande entre les centrales (on ne pourra jamais dépasser ni la marge, ni la rampe).
+    
+    Le cas d'une centrale indisponible : si available est à False dans le JSON, la fonction retourne 0 directement 
+    — on ne peut rien demander à une centrale hors service, peu importe sa marge théorique.
+    
+    le fichier JSON contient déjà, pour chaque centrale, un champ initial_dispatchable_margin_mw — une valeur de 
+    référence. Notre fonction dispatchable_margin doit retourner exactement ce nombre. Par exemple pour golfech, 
+    le JSON dit 89, et notre fonction doit donner 89.0. C'est une vérification simple et convaincante à
+    montrer   otre calcul retombe sur les chiffres officiels du jeu de données 

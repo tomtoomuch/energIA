@@ -1,17 +1,14 @@
-"""Ce fichier trouve le chemin le moins cher entre deux centrales
-
-Le "poids" utilisé ici est la distance en kilomètres (distance_km).
-"""
+# Ce fichier trouve le chemin le moins cher entre deux centrales
+#
+# Le "poids" utilisé ici est la distance en kilomètres (distance_km).
 
 
 def dijkstra(graph, start, end):
-    """
-    Cherche le chemin  entre `start` et `end`
-
-    tourne un tuple (chemin, distance_totale) :
-        - chemin : liste des identifiants de centrales, de start à end inclus
-        - distance_totale : somme des distance_km sur ce chemin
-    """
+    #  Cherche le chemin  entre `start` et `end`
+    #
+    #     tourne un tuple (chemin, distance_totale) :
+    #         - chemin : liste des identifiants de centrales, de start à end inclus
+    #         - distance_totale : somme des distance_km sur ce chemin
     if start not in graph:
         raise ValueError(f"Centrale de départ inconnue dans le graphe : {start}")
     if end not in graph:
