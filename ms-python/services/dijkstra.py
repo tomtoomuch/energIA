@@ -5,22 +5,29 @@ Le "poids" utilisé ici est la distance en kilomètres (distance_km).
 
 
 def dijkstra(graph, start, end):
+    """
+    Cherche le chemin  entre `start` et `end`
 
+    tourne un tuple (chemin, distance_totale) :
+        - chemin : liste des identifiants de centrales, de start à end inclus
+        - distance_totale : somme des distance_km sur ce chemin
+    """
     if start not in graph:
         raise ValueError(f"Centrale de départ inconnue dans le graphe : {start}")
     if end not in graph:
         raise ValueError(f"Centrale d'arrivée inconnue dans le graphe : {end}")
 
-
+    # distances connues depuis start
     distances = {node: float("inf") for node in graph}
     distances[start] = 0
 
+    # pour reconstruire le chemin à la fin
     previous = {}
 
     visited = set()
 
     while len(visited) < len(graph):
-
+        # on choisit la centrale non visitée avec la plus petite distance connue
         current = None
         current_distance = float("inf")
         for node, dist in distances.items():
@@ -28,17 +35,17 @@ def dijkstra(graph, start, end):
                 current = node
                 current_distance = dist
 
-
+        # rien d'accessible : on arrête
         if current is None:
             break
 
-
+        # arrivée trouvée
         if current == end:
             break
 
         visited.add(current)
 
-
+        # on essaie d'améliorer la distance de chaque voisin
         for edge in graph[current]:
             if not edge["available"]:
                 continue
@@ -54,7 +61,6 @@ def dijkstra(graph, start, end):
     if distances[end] == float("inf"):
         return None, None
 
-    # reconstruction du chemin en remontant previous depuis end
     path = [end]
     node = end
     while node != start:
@@ -64,3 +70,18 @@ def dijkstra(graph, start, end):
 
     return path, distances[end]
 
+
+if __name__ == "__main__":
+    from graph_loader import load_data, build_graph
+
+    data = load_data()
+    graph = build_graph(data)
+
+    path, total_distance = dijkstra(graph, "golfech", "nogent")
+    print("Chemin golfech -> nogent :", path)
+    print("Distance totale (km) :", total_distance)
+
+
+    mini_graph = {"a": [], "b": []}
+    path, total_distance = dijkstra(mini_graph, "a", "b")
+    print("Chemin a -> b (mini-graphe sans liaison) :", path)
