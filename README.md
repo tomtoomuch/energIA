@@ -13,6 +13,26 @@ Données disponibles au format JSON -> importation dans mongoDB ?
 
 ### Architecture
 
+```mermaid
+---
+config:
+  layout: elk
+---
+sequenceDiagram
+    participant Client
+    participant GatewayExpress as Gateway Express
+    participant ServicePython as Service Python (Flask)
+    participant Algorithm as Algorithm (Graph + Dijkstra + Score)
+
+    Client->>GatewayExpress: Request
+    GatewayExpress->>ServicePython: Forward Request
+    ServicePython->>Algorithm: Process with Graph & Dijkstra
+    Algorithm->>Algorithm: Calculate Shortest Path
+    Algorithm->>Algorithm: Compute Score
+    Algorithm-->>ServicePython: Return Result
+    ServicePython-->>GatewayExpress: Response
+    GatewayExpress-->>Client: Return Response
+```
 
 ## Installation
 
