@@ -7,7 +7,12 @@ app.use(express.json());
 
 // Define a simple route
 app.get('/', (req, res) => {
-  res.send('Welcome to the Gateway Service!');
+  res.status(200).json(
+    {
+        success: true,
+        message: "Welcome to the Gateway Service!"
+    }
+  );
 });
 
 app.listen(port, () => {
