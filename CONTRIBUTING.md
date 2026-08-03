@@ -9,5 +9,6 @@ depuis les branches spécifiques aux micro-services : nodeAPI et pythonAPI
 
 ## Commits
 
-On étiquette le commit avec une mention <feat>, <fix>, <docs>, <devops>, <refactory>
-en fonction des modifications apportées
+On étiquette le commit avec une mention ```
+	<feat>, <fix>, <doc>, <devops>```
+en fonction des modifications apportées par le commit
