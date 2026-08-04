@@ -6,16 +6,18 @@ const port = process.env.GATEWAY_PORT || 3000;
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
+app.get("/health", (req, res) => {
     res.status(200).json({
         success: true,
         message: "Welcome to energIA API Gateway!"
     });
 });
 
-
-app.get("/health/python", async (req, res) => {
-
+app.get("/health-ms", async (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Welcome to energIA API Gateway!"
+    });
 });
 
 
