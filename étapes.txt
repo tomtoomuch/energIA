@@ -24,8 +24,14 @@ disponible = minimum(soft_upper_bound_mw − initial_output_mw, max_ramp_up_mw_p
 Utiliser local_plant_ids de la région d'abord, puis external_entry_plant_ids, puis tout le graphe via Dijkstra si besoin.
 10. Créer le score (formule officielle, pas inventée)
 score = distance_km × 1.0 + pertes_% × 45.0 + (taux_de_charge_final)⁴ × 900.0 + pénalité_technique × 200.0 − 250 si locale. Le plus petit score gagne.
+
+
+
 11. Répartir la demande
 Trier les candidates par score croissant, donner à chacune jusqu'à sa marge disponible (sans dépasser la rampe ni la capacité de la liaison), continuer jusqu'à demande couverte ou plus de candidates.
+
+
+
 12. Cas impossible
 Si le total disponible est inférieur à la demande, répondre clairement avec le nombre de MW manquants.
 13. Routes du service Python (Flask)
