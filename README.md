@@ -73,6 +73,10 @@ ne plus pouvoir avancer.
     **previous :** par quelle centrale on est passé juste avant, pour pouvoir reconstruire le chemin complet à la fin (sinon on connaît juste la distance, pas le trajet).
     **visited :** les centrales déjà "réglées", pour ne pas repasser dessus inutilement.
 
+**4 shortest_paths_from
+    Au lieu de chercher le chemin vers une seule centrale, cette fonction calcule d'un coup le chemin le plus court vers 
+    toutes les centrales atteignables depuis un point de départ
+
 #### ms-python/services/**capacity.py**
 
 Ce fichier calcule combien de MW en plus chaque centrale peut encore produire, avant d'atteindre sa limite de sécurité.
