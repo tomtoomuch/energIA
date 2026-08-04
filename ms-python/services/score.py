@@ -69,7 +69,7 @@ if __name__ == "__main__":
     # Région étudiée.
     occitanie = regions_index["occitanie"]
 
-
+    # Toutes les centrales candidates avec distance,
     # pertes, chemin et statut local/externe.
     candidates = region_candidates(graph, occitanie)
 

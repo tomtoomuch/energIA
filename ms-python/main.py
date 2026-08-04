@@ -14,9 +14,9 @@ class Item(BaseModel):
     price: float
     is_offer: bool | None = None
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+@app.get("/health")
+def read_health():
+    return {"status": "Python MS Up and running"}
 
 # Etablir une route pour récupérer la liste des centrales
 @app.get("/plants")
