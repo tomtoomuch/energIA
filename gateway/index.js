@@ -19,15 +19,21 @@ app.get("/health/python", async (req, res) => {
 });
 
 
-app.get("/path", async (req, res) => {
+app.get("/plants", async (req, res) => {
 
 });
 
+app.get("/regions", async (req, res) => {
+
+});
+
+app.get("/network", async (req, res) => {
+
+});
 
 app.post("/simulate", async (req, res) => {
 
 });
-
 
 app.listen(port, () => {
     console.log(`Gateway service listening at http://localhost:${port}`);
