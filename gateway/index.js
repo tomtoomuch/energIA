@@ -1,6 +1,5 @@
 const express = require("express");
 const axios = require("axios");
-
 const app = express();
 const port = process.env.GATEWAY_PORT || 3000;
 
@@ -13,12 +12,15 @@ app.get("/health", (req, res) => {
     });
 });
 
-app.get("/health-ms", async (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: "Welcome to energIA API Gateway!"
-    });
-});
+app.get("/health-ms",  async (req,res) => {
+    try { 
+        const response = await axios.get("http://energia-ms-python:8000/health", {
+        });
+        return res.status(200).json({"message":"ok", response: response.data})
+    } catch (err) {
+        return res.status(500).json({"message":"erreur", err })
+    }
+})
 
 
 app.get("/plants", async (req, res) => {
