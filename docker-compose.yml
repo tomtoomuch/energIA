@@ -1,16 +1,16 @@
 services:
   gateway:
-    build: ./gateway
+    image: tomtoomuch/energia-gateway
     ports:
       - "${GATEWAY_PORT:-3000}:3000"
     env_file:
-      - .env
+      - ./.env
     depends_on:
       - ms-python
     restart: unless-stopped
 
   ms-python:
-    build: ./ms-python
+    image: tomtoomuch/energia-ms-python
     ports:
       - "${PYTHON_PORT:-8000}:8000"
     env_file:
