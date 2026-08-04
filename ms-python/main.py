@@ -35,7 +35,6 @@ def read_network():
 
 # Etablir une route pour lancer une simulation
 @app.post("/simulate")
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
+def simulate(item: Item):
+    # Ici, vous pouvez ajouter la logique pour lancer une simulation basée sur les données reçues
+    return {"message": f"Simulation lancée pour {item.name} avec un prix de {item.price} et is_offer={item.is_offer}"}
