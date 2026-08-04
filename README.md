@@ -73,6 +73,10 @@ ne plus pouvoir avancer.
     **previous :** par quelle centrale on est passé juste avant, pour pouvoir reconstruire le chemin complet à la fin (sinon on connaît juste la distance, pas le trajet).
     **visited :** les centrales déjà "réglées", pour ne pas repasser dessus inutilement.
 
+**4 shortest_paths_from
+    Au lieu de chercher le chemin vers une seule centrale, cette fonction calcule d'un coup le chemin le plus court vers 
+    toutes les centrales atteignables depuis un point de départ
+
 #### ms-python/services/**capacity.py**
 
 Ce fichier calcule combien de MW en plus chaque centrale peut encore produire, avant d'atteindre sa limite de sécurité.
@@ -107,6 +111,29 @@ Le bloc if __name__ == "__main__": : un test à la main sur deux régions diffé
 Pour l'Occitanie, qui a golfech comme unique centrale locale, l'ordre doit être ['golfech', 'tricastin', 'cruas', 'saint_alban'].
 Pour l'Île-de-France, qui n'a aucune centrale locale (regarde local_plant_ids: [] dans le JSON), l'ordre de recherche commence directement par les centrales externes : ['nogent', 'dampierre', 'saint_laurent']. C'est un cas important du brief : certaines régions n'ont pas de centrale chez elles, il faut quand même pouvoir répondre.
 
+
+
+####  _ms-python/services/candidates.py
+Ce fichier donne, pour une région donnée, la liste complète des centrales candidates avec leur distance et 
+leurs pertes — en combinant les centrales locales, les centrales d'entrée externes, et le reste du graphe si besoin.
+avant, on avait deux briques séparées mais aucune ne suffisait seule. priority.py savait dire "regarde d'abord les
+centrales locales, puis les externes" — mais s'arrêtait là, sans jamais chercher plus loin dans le réseau si ces deux
+listes ne suffisaient pas. dijkstra.py savait calculer des distances et des chemins, mais seulement si on lui donnait 
+déjà un point de départ et une cible précise. candidates.py relie les deux : il utilise priority.py pour savoir par où
+commencer, et dijkstra.shortest_paths_from pour explorer tout le reste du graphe automatiquement.
+la fonction region_candidates
+D'abord, elle prend toutes les centrales locales de la région et leur donne une distance de 0 et des pertes de 0 — 
+logique, elles sont déjà sur place, pas besoin de les transporter sur le réseau.
+
+Ensuite, elle détermine les "points de départ" (anchors) pour explorer le reste du graphe : 
+les centrales locales de la région si elle en a, sinon ses centrales d'entrée externes
+(cas d'une région comme l'Île-de-France, qui n'a aucune centrale chez elle).
+
+Pour chaque point de départ, elle lance shortest_paths_from — qui donne d'un coup la distance vers toutes les autres 
+centrales du pays. Elle ajoute chaque centrale trouvée à la liste des candidates, avec sa distance et ses pertes.
+si plusieurs points de départ permettent d'atteindre la même centrale, elle garde la distance la plus courte trouvée 
+(if plant_id not in candidates or info["distance_km"] < '...') — logique, on veut toujours comparer la meilleure option 
+disponible, pas une option au hasard.
 ### Données utilisées
 
 Les données sont structurées autour des trois piliers suivants :
