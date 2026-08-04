@@ -1,20 +1,34 @@
-// Import the express library
-const express = require('express');
+const express = require("express");
+const axios = require("axios");
+
 const app = express();
-const port = 3000;
+const port = process.env.GATEWAY_PORT || 3000;
 
 app.use(express.json());
 
-// Define a simple route
-app.get('/', (req, res) => {
-  res.status(200).json(
-    {
+app.get("/", (req, res) => {
+    res.status(200).json({
         success: true,
-        message: "Welcome to energIA API Gateway !"
-    }
-  );
+        message: "Welcome to energIA API Gateway!"
+    });
 });
 
+
+app.get("/health/python", async (req, res) => {
+
+});
+
+
+app.get("/path", async (req, res) => {
+
+});
+
+
+app.post("/simulate", async (req, res) => {
+
+});
+
+
 app.listen(port, () => {
-  console.log(`Gateway service listening at http://localhost:${port}`);
+    console.log(`Gateway service listening at http://localhost:${port}`);
 });
