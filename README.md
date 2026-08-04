@@ -86,6 +86,27 @@ Le cas d'une centrale indisponible : si available est à False dans le JSON, la 
 
 le fichier JSON contient déjà, pour chaque centrale, un champ initial_dispatchable_margin_mw — une valeur de référence. Notre fonction dispatchable_margin doit retourner exactement ce nombre. Par exemple pour Golfech, le JSON dit 89, et notre fonction doit donner 89.0. C'est une vérification simple et convaincante à montrer notre calcul retombe sur les chiffres officiels du jeu de données.
 
+
+
+
+
+####  _ms-python/services/priopity.py
+Ce fichier décide dans quel ordre chercher des centrales pour une région donnée :
+d'abord chez elle, ensuite les voisines les plus évidentes.
+
+
+t_region(regions_index, region_id) : retrouve une région complète à partir de son identifiant (par exemple "occitanie"). regions_index est le dictionnaire {id: région} qu'on construit avec build_regions_index (déjà dans graph_loader.py). Si l'id n'existe pas, on lève une erreur claire plutôt que de planter avec un message incompréhensible.
+
+local_plant_ids(region) : retourne juste la liste local_plant_ids du JSON — les centrales physiquement situées dans cette région. Ce sont elles qu'il faut regarder en premier, selon le brief.
+
+external_entry_plant_ids(region) : retourne external_entry_plant_ids — des centrales voisines, pré-identifiées dans le JSON comme "point d'entrée" pratique pour cette région, à regarder en second si les centrales locales ne suffisent pas.
+
+candidate_search_order(region) : la fonction la plus importante ici. Elle assemble les deux listes précédentes, dans l'ordre (locale d'abord, externe ensuite), et retire les doublons si jamais une centrale apparaissait dans les deux listes. Résultat : une seule liste, dans le bon ordre de priorité, prête à être utilisée par la suite (calcul du score, répartition).
+
+Le bloc if __name__ == "__main__": : un test à la main sur deux régions différentes.
+Pour l'Occitanie, qui a golfech comme unique centrale locale, l'ordre doit être ['golfech', 'tricastin', 'cruas', 'saint_alban'].
+Pour l'Île-de-France, qui n'a aucune centrale locale (regarde local_plant_ids: [] dans le JSON), l'ordre de recherche commence directement par les centrales externes : ['nogent', 'dampierre', 'saint_laurent']. C'est un cas important du brief : certaines régions n'ont pas de centrale chez elles, il faut quand même pouvoir répondre.
+
 ### Données utilisées
 
 Les données sont structurées autour des trois piliers suivants :
