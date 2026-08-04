@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from .services.graph_loader import load_data, build_plants_index, build_regions_index, build_graph
+from services.graph_loader import load_data, build_plants_index, build_regions_index, build_graph
 
 app = FastAPI()
 
