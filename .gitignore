@@ -1,14 +1,8 @@
 brief/**
 gateway/node_modules/**
 .obsidian/
-<<<<<<< HEAD
-<<<<<<< HEAD
 .env
-=======
 .env
 ms-python/services/__pycache__/
->>>>>>> svetlana
-=======
 .env
 app/__pycache__/**
->>>>>>> 08a068afdc1778aa7e846a740c2341a90d97169f
