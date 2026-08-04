@@ -1,8 +1,13 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from ..ms-python.services.graph_loader import build_plants_index, build_regions_index, load_data
+from .services.graph_loader import load_data, build_plants_index, build_regions_index, build_graph
 
 app = FastAPI()
+
+# Charger les données
+data = load_data()
+plants_index = build_plants_index(data)
+regions_index = build_regions_index(data)
 
 class Item(BaseModel):
     name: str
@@ -15,12 +20,18 @@ def read_root():
 
 # Etablir une route pour récupérer la liste des centrales
 @app.get("/plants")
+def read_plants():
+    return list(plants_index.values())
 
 # Etablir une route pour récupérer la liste des régions
 @app.get("/regions")
+def read_regions():
+    return list(regions_index.values())
 
 # Etablir une route pour visualiser le réseau
 @app.get("/network")
+def read_network():
+    return build_graph(data)
 
 # Etablir une route pour lancer une simulation
 @app.post("/simulate")
