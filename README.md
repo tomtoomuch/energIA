@@ -1,7 +1,8 @@
 
 
  ms-python/services/ graph_loader.py
-    Ce fichier transforme les données brutes du JSON (centrales, liaisons) en une structure que le programme peut utiliser facilement pour calculer des chemins — un graphe
+    Ce fichier transforme les données brutes du JSON (centrales, liaisons) en une structure que le programme 
+ peut utiliser facilement pour calculer des chemins — un graphe
     
     
     
