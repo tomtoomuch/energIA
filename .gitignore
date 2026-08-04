@@ -1,4 +1,9 @@
 brief/**
 gateway/node_modules/**
 .obsidian/
+<<<<<<< HEAD
 .env
+=======
+.env
+ms-python/services/__pycache__/
+>>>>>>> svetlana
