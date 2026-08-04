@@ -15,7 +15,6 @@ def read_root():
 # Etablir une route pour récupérer la liste des centrales
 @app.get("/plants")
 
-
 # Etablir une route pour récupérer la liste des régions
 @app.get("/regions")
 

@@ -2,4 +2,4 @@ brief/**
 gateway/node_modules/**
 .obsidian/
 .env
-__pycache__/**
+app/__pycache__/**
