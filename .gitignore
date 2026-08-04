@@ -2,7 +2,5 @@ brief/**
 gateway/node_modules/**
 .obsidian/
 .env
-.env
 ms-python/services/__pycache__/
-.env
 app/__pycache__/**
