@@ -15,6 +15,9 @@ app.get("/health", (req, res) => {
 app.get("/health-ms",  async (req,res) => {
     try { 
         const response = await axios.get("http://ms-python:8000/health", {
+            headers: {
+                'x-api-key': process.env.SECURITY_TOKEN,
+            }
         });
         return res.status(200).json({"message":"ok", response: response.data})
     } catch (err) {
@@ -26,6 +29,9 @@ app.get("/health-ms",  async (req,res) => {
 app.get("/plants", async (req, res) => {
     try { 
         const response = await axios.get("http://ms-python:8000/plants", {
+            headers: {
+                'x-api-key': process.env.SECURITY_TOKEN,
+            }
         });
         return res.status(200).json({ success: true, response: response.data })
     } catch (err) {
@@ -36,6 +42,9 @@ app.get("/plants", async (req, res) => {
 app.get("/regions", async (req, res) => {
     try { 
         const response = await axios.get("http://ms-python:8000/regions", {
+            headers: {
+                'x-api-key': process.env.SECURITY_TOKEN,
+            }
         });
         return res.status(200).json({ success: true, response: response.data })
         } catch (err) {
@@ -46,6 +55,9 @@ app.get("/regions", async (req, res) => {
 app.get("/network", async (req, res) => {
     try { 
         const response = await axios.get("http://ms-python:8000/network", {
+            headers: {
+                'x-api-key': process.env.SECURITY_TOKEN,
+            }
         });
         return res.status(200).json({ success: true, response: response.data })
     } catch (err) {
@@ -54,7 +66,16 @@ app.get("/network", async (req, res) => {
 });
 
 app.post("/simulate", async (req, res) => {
-    return res.status(200).json({ success: true, message: "Simulation pas encore opé mais la route répond." })
+    try { 
+        const response = await axios.post("http://ms-python:8000/simulate", req.body, {
+            headers: {
+                'x-api-key': process.env.SECURITY_TOKEN,
+            }
+        });
+        return res.status(200).json({ success: true, response: response.data })
+    } catch (err) {
+        return res.status(500).json({ success: false, message: "erreur", err })
+    }
 });
 
 app.listen(port, () => {
