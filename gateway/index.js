@@ -14,7 +14,7 @@ app.get("/health", (req, res) => {
 
 app.get("/health-ms",  async (req,res) => {
     try { 
-        const response = await axios.get("http://energia-ms-python:8000/health", {
+        const response = await axios.get("http://ms-python-1:8000/health", {
         });
         return res.status(200).json({"message":"ok", response: response.data})
     } catch (err) {
