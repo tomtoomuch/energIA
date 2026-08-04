@@ -73,13 +73,7 @@ def dijkstra(graph, start, end):
 
 def shortest_paths_from(graph, start):
    #Calcule, depuis `start`, le chemin le plus court (en distance) vers
-    # TOUTES les autres centrales disponible du graphe
-    # dictionnaire :
-    #     {
-    #       "civaux": {"path": ["golfech", "civaux"], "distance_km": 262.5, "loss_percent": 1.27},
-    #       ...
-    #     }
-    #
+
     # Les centrales non disponible depuis `start` ne sont pas incluses.
     # `loss_percent` est la somme des pertes des liaisons traversées sur ce
     # chemin précis
