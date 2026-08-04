@@ -1,3 +1,4 @@
 brief/**
 gateway/node_modules/**
 .obsidian/
+.env
