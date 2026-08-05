@@ -38,10 +38,10 @@ sequenceDiagram
     Ce micro-service implémente l'ensemble des calculs complexes : modélisation du réseau, algorithmes de cheminement et d'optimisation. 
 * Il est construit en utilisant FastAPI pour exposer ses fonctionnalités via une API REST interne.
 
-* **Moteur algorithmique (modélisation graph) : ** les traitements lourds
+* **Moteur algorithmique (modélisation graph) :** les traitements lourds
     **Modélisation :** Traitement des données du parc nucléaire (nodes/sommets = centrales, edges/arêtes = liaisons).
     **Optimisation de cheminement :** Implémentation de l'algorithme de Dijkstra pour trouver le chemin le plus court entre deux points dans le réseau maillé.
-    **Calcul des capacités disponibles :** Détermination de la puissance disponible en fonction du minimum entre les limites supérieures (soft upper bound) et la rampe de montée maximale (max_ramp_up_mw_per_15_min).
+    **Calcul des capacités disponibles :** Détermination de la puissance disponible en fonction du minimum entre les limites supérieures (_soft upper bound_) et la rampe de montée maximale (_max_ramp_up_mw_per_15_min_).
 
 #### ms-python/services/**graph_loader.py**
 
@@ -58,19 +58,14 @@ Ce fichier transforme les données brutes du JSON (centrales, liaisons) en une s
 
 #### ms-python/services/**dijkstra.py**
 
-Ce fichier trouve le chemin le moins cher entre deux centrales, en passant par le réseau de liaisons — c'est
-l'algorithme de Dijkstra, qu'on a écrit nous-mêmes sans bibliothèque
+Ce fichier trouve le chemin le moins cher entre deux centrales, en passant par le réseau de liaisons — c'est l'algorithme de Dijkstra, qu'on a écrit nous-mêmes sans bibliothèque.
 
 On part d'une centrale de départ. On ne connaît encore la distance vers aucune autre centrale 
-(distance "infinie" pour toutes, sauf 0 pour le départ). Ensuite, à chaque tour, on va toujours voir en premier 
-la centrale la plus proche qu'on connaît déjà — jamais une piste au hasard. À partir de cette centrale, 
-on regarde ses voisins directs dans le graphe : si passer par elle donne un chemin plus court que ce qu'on
-savait avant, on met à jour la distance. On répète ça jusqu'à avoir atteint la centrale d'arrivée, ou jusqu'à
-ne plus pouvoir avancer.
+(distance "infinie" pour toutes, sauf 0 pour le départ). Ensuite, à chaque tour, on va toujours voir en premier la centrale la plus proche qu'on connaît déjà — jamais une piste au hasard. À partir de cette centrale, on regarde ses voisins directs dans le graphe : si passer par elle donne un chemin plus court que ce qu'on savait avant, on met à jour la distance. On répète ça jusqu'à avoir atteint la centrale d'arrivée, ou jusqu'à ne plus pouvoir avancer.
 
 **3 variables à connaître**
     **distances :** la meilleure distance connue jusqu'ici pour chaque centrale.
-    **previous :** par quelle centrale on est passé juste avant, pour pouvoir reconstruire le chemin complet à la fin (sinon on connaît juste la distance, pas le trajet).
+	**previous :** par quelle centrale on est passé juste avant, pour pouvoir reconstruire le chemin          complet à la fin (sinon on connaît juste la distance, pas le trajet).
     **visited :** les centrales déjà "réglées", pour ne pas repasser dessus inutilement.
 
 **4 shortest_paths_from
