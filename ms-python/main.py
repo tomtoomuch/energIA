@@ -34,10 +34,10 @@ def read_health():
 def read_plants():
     return list(plants_index.values())
 
-
 @app.get("/regions", dependencies=[Depends(verify_api_key)])
 def read_regions():
     return list(regions_index.values())
+
 
 
 @app.get("/network", dependencies=[Depends(verify_api_key)])
@@ -45,9 +45,21 @@ def read_network():
     return graph
 
 
+
 @app.post("/simulate", dependencies=[Depends(verify_api_key)])
 def simulate(request: SimulationRequest):
     region = regions_index.get(request.region)
+
     if region is None:
-        raise HTTPException(status_code=404, detail=f"Region inconnue: {request.region}")
-    return allocate(region, request.additional_demand_mw, graph, plants_index, simulation_parameters)
+        raise HTTPException(
+            status_code=404,
+            detail=f"Region inconnue: {request.region}"
+        )
+
+    return allocate(
+        region,
+        request.additional_demand_mw,
+        graph,
+        plants_index,
+        simulation_parameters
+    )
