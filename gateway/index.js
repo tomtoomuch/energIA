@@ -3,7 +3,7 @@ const axios = require("axios");
 const app = express();
 const path = require("path");
 const port = process.env.GATEWAY_PORT || 3000;
-const PYTHON_API_URL = process.env.PYTHON_SERVICE_URL || "http://ms-python:8000";
+const PYTHON_API_URL = process.env.PYTHON_SERVICE_URL || "http://ms-python-1:8000";
 const SECURITY_TOKEN = process.env.SECURITY_TOKEN;
 
 app.use(express.json());
