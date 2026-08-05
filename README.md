@@ -54,7 +54,7 @@ Ce fichier transforme les données brutes du JSON (centrales, liaisons) en une s
 * **build_plants_index(data)** et **build_regions_index(data) :** deux dictionnaires bonus, pour retrouver rapidement les infos complètes d'une centrale ou d'une région à partir de son identifiant, sans reparcourir toute la liste à chaque fois. Utile pour les étapes suivantes (calcul de marge, priorité locale).
 
 >Ce fichier n'intègre ni Flask ni les routes HTTP — il ne fait que manipuler des données, dans le respect du principe de séparation des responsabilités. C'est ce que le brief demande ("le code algorithmique séparé des routes HTTP"), et ça permet de le tester tout seul, sans lancer le serveur.
->Pour tester, lancer un terminal et appeller : ```python graph_loader.py```
+>Pour tester, lancer un terminal et appeler : ```python graph_loader.py```
 
 #### ms-python/services/**dijkstra.py**
 
@@ -68,39 +68,33 @@ On part d'une centrale de départ. On ne connaît encore la distance vers aucune
 	**previous :** par quelle centrale on est passé juste avant, pour pouvoir reconstruire le chemin          complet à la fin (sinon on connaît juste la distance, pas le trajet).
     **visited :** les centrales déjà "réglées", pour ne pas repasser dessus inutilement.
 
-**4 shortest_paths_from
-    Au lieu de chercher le chemin vers une seule centrale, cette fonction calcule d'un coup le chemin le plus court vers 
-    toutes les centrales atteignables depuis un point de départ
+1 fonction
+	**shortest_paths_from :** au lieu de chercher le chemin vers une seule centrale, cette fonction calcule d'un coup le chemin le plus court vers toutes les centrales atteignables depuis un point de départ
 
 #### ms-python/services/**capacity.py**
 
 Ce fichier calcule combien de MW en plus chaque centrale peut encore produire, avant d'atteindre sa limite de sécurité.
 
-Chaque centrale a une limite haute qu'elle ne doit jamais dépasser (soft_upper_bound_mw - fixée à 95% de sa puissance installée - une marge de sécurité).
-Elle a aussi une production actuelle (initial_output_mw). La différence entre les deux, c'est ce qu'elle peut encore donner : marge = limite − production actuelle.
+Chaque centrale a une limite haute qu'elle ne doit jamais dépasser (_soft_upper_bound_mw_ - fixée à 95% de sa puissance installée - une marge de sécurité).
+Elle a aussi une production actuelle (_initial_output_mw_). La différence entre les deux, c'est ce qu'elle peut encore distribuer : marge = limite − production actuelle.
 
-Pourquoi on garde ramp_limit séparée : une centrale peut avoir beaucoup de marge (par exemple 600 MW), mais elle ne peut pas monter en puissance instantanément — elle a une vitesse maximale de montée par tranche de 15 minutes (max_ramp_up_mw_per_15_min). On garde cette info à part pour l'instant, parce qu'elle servira plus tard, quand on répartira vraiment la demande entre les centrales (on ne pourra jamais dépasser ni la marge, ni la rampe).
+Pourquoi on garde _ramp_limit_ séparée : une centrale peut avoir beaucoup de marge (par exemple 600 MW), mais elle ne peut pas monter en puissance instantanément — elle a une vitesse maximale de montée par tranche de 15 minutes (_max_ramp_up_mw_per_15_min_). On garde cette info à part pour l'instant, parce qu'elle servira plus tard, quand on répartira vraiment la demande entre les centrales (on ne pourra jamais dépasser ni la marge, ni la rampe).
 
-Le cas d'une centrale indisponible : si available est à False dans le JSON, la fonction retourne 0 directement — on ne peut rien demander à une centrale hors service, peu importe sa marge théorique.
+Le cas d'une centrale indisponible : si _available_ est à ```False``` dans le JSON, la fonction retourne 0 directement — on ne peut rien demander à une centrale hors service, peu importe sa marge théorique.
 
-le fichier JSON contient déjà, pour chaque centrale, un champ initial_dispatchable_margin_mw — une valeur de référence. Notre fonction dispatchable_margin doit retourner exactement ce nombre. Par exemple pour Golfech, le JSON dit 89, et notre fonction doit donner 89.0. C'est une vérification simple et convaincante à montrer notre calcul retombe sur les chiffres officiels du jeu de données.
+Le fichier JSON contient déjà, pour chaque centrale, un champ _initial_dispatchable_margin_mw_ — une valeur de référence. Notre fonction _dispatchable_margin_ doit retourner exactement ce nombre. Par exemple pour Golfech, le JSON dit 89, et notre fonction doit donner 89.0. C'est une vérification simple qui montre que notre calcul retombe sur les chiffres officiels du jeu de données.
 
-
-
-
-
-####  _ms-python/services/priopity.py
+####  _ms-python/services/**priority.py**
 Ce fichier décide dans quel ordre chercher des centrales pour une région donnée :
 d'abord chez elle, ensuite les voisines les plus évidentes.
 
+**t_region(regions_index, region_id) :** retrouve une région complète à partir de son identifiant (par exemple "occitanie"). _regions_index_ est le dictionnaire {id: région} qu'on construit avec _build_regions_index_ (déjà mobilisée dans ```graph_loader.py```). Si l'_id_ n'existe pas, on lève une erreur claire plutôt que de planter avec un message incompréhensible.
 
-t_region(regions_index, region_id) : retrouve une région complète à partir de son identifiant (par exemple "occitanie"). regions_index est le dictionnaire {id: région} qu'on construit avec build_regions_index (déjà dans graph_loader.py). Si l'id n'existe pas, on lève une erreur claire plutôt que de planter avec un message incompréhensible.
+**local_plant_ids(region) :** retourne juste la liste _local_plant_ids_ du JSON — les centrales physiquement situées dans cette région. Ce sont elles qu'il faut regarder en premier, selon le brief.
 
-local_plant_ids(region) : retourne juste la liste local_plant_ids du JSON — les centrales physiquement situées dans cette région. Ce sont elles qu'il faut regarder en premier, selon le brief.
+**external_entry_plant_ids(region) :** retourne external_entry_plant_ids — des centrales voisines, pré-identifiées dans le JSON comme "point d'entrée" pratique pour cette région, à regarder en second si les centrales locales ne suffisent pas.
 
-external_entry_plant_ids(region) : retourne external_entry_plant_ids — des centrales voisines, pré-identifiées dans le JSON comme "point d'entrée" pratique pour cette région, à regarder en second si les centrales locales ne suffisent pas.
-
-candidate_search_order(region) : la fonction la plus importante ici. Elle assemble les deux listes précédentes, dans l'ordre (locale d'abord, externe ensuite), et retire les doublons si jamais une centrale apparaissait dans les deux listes. Résultat : une seule liste, dans le bon ordre de priorité, prête à être utilisée par la suite (calcul du score, répartition).
+**candidate_search_order(region) :** la fonction la plus importante ici. Elle assemble les deux listes précédentes, dans l'ordre (locale d'abord, externe ensuite), et retire les doublons si jamais une centrale apparaissait dans les deux listes. Résultat : une seule liste, dans le bon ordre de priorité, prête à être utilisée par la suite (calcul du score, répartition).
 
 Le bloc if __name__ == "__main__": : un test à la main sur deux régions différentes.
 Pour l'Occitanie, qui a golfech comme unique centrale locale, l'ordre doit être ['golfech', 'tricastin', 'cruas', 'saint_alban'].
