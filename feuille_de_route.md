@@ -11,7 +11,7 @@
     2. gateway/
        (fichier principal : index.js)
     3. ms-python/
-	   (fichier principal : app.py, technologie : Flask)
+	   (fichier principal : main.py, technologie : FastAPI)
 
 ## Docker
 
@@ -67,7 +67,7 @@ Trier les candidates par score croissant, donner à chacune jusqu'à sa marge di
 
 Si le total disponible est inférieur à la demande, répondre clairement avec le nombre de MW manquants.
 
-## Routes du service Python (Flask)
+## Routes du service Python (FastAPI)
 GET /plants, GET /regions, GET /network, POST /simulate.
 
 ## Passer par la gateway Express
@@ -99,7 +99,7 @@ config:
 sequenceDiagram
     participant Client
     participant GatewayExpress as Gateway Express
-    participant ServicePython as Service Python (Flask)
+    participant ServicePython as Service Python (FastAPI)
     participant Algorithm as Algorithm (Graph + Dijkstra + Score)
 
     Client->>GatewayExpress: Request

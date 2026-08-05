@@ -1,80 +1,77 @@
 const express = require("express");
 const axios = require("axios");
 const app = express();
+const path = require("path");
 const port = process.env.GATEWAY_PORT || 3000;
+const PYTHON_API_URL = process.env.PYTHON_SERVICE_URL || "http://ms-python:8000";
+const SECURITY_TOKEN = process.env.SECURITY_TOKEN;
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
+
+
+
+function pythonHeaders() {
+    return { "x-api-key": SECURITY_TOKEN };
+}
+
+function handlePythonError(error, res) {
+    console.error("Erreur appel service Python:", error.message);
+    const status = error.response?.status || 500;
+    const detail = error.response?.data || { message: "Impossible de contacter le service Python" };
+    return res.status(status).json({ success: false, error: detail });
+}
 
 app.get("/health", (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: "Welcome to energIA API Gateway!"
-    });
+    res.status(200).json({ success: true, message: "Welcome to energIA API Gateway!" });
 });
 
-app.get("/health-ms",  async (req,res) => {
-    try { 
-        const response = await axios.get("http://ms-python:8000/health", {
-            headers: {
-                'x-api-key': process.env.SECURITY_TOKEN,
-            }
-        });
-        return res.status(200).json({"message":"ok", response: response.data})
-    } catch (err) {
-        return res.status(500).json({"message":"erreur", err })
+app.get("/health-ms", async (req, res) => {
+    try {
+        const response = await axios.get(`${PYTHON_API_URL}/health`);
+        return res.status(200).json({ success: true, response: response.data });
+    } catch (error) {
+        return handlePythonError(error, res);
     }
-})
-
+});
 
 app.get("/plants", async (req, res) => {
-    try { 
-        const response = await axios.get("http://ms-python:8000/plants", {
-            headers: {
-                'x-api-key': process.env.SECURITY_TOKEN,
-            }
-        });
-        return res.status(200).json({ success: true, response: response.data })
-    } catch (err) {
-        return res.status(500).json({ success: false, message: "erreur", err })
+    try {
+        console.log(`[GET] /plants -> ${PYTHON_API_URL}/plants`);
+        const response = await axios.get(`${PYTHON_API_URL}/plants`, { headers: pythonHeaders() });
+        return res.status(200).json({ success: true, response: response.data });
+    } catch (error) {
+        return handlePythonError(error, res);
     }
 });
 
 app.get("/regions", async (req, res) => {
-    try { 
-        const response = await axios.get("http://ms-python:8000/regions", {
-            headers: {
-                'x-api-key': process.env.SECURITY_TOKEN,
-            }
-        });
-        return res.status(200).json({ success: true, response: response.data })
-        } catch (err) {
-            return res.status(500).json({ success: false, message: "erreur", err })
-        }
+    try {
+        console.log(`[GET] /regions -> ${PYTHON_API_URL}/regions`);
+        const response = await axios.get(`${PYTHON_API_URL}/regions`, { headers: pythonHeaders() });
+        return res.status(200).json({ success: true, response: response.data });
+    } catch (error) {
+        return handlePythonError(error, res);
+    }
 });
 
 app.get("/network", async (req, res) => {
-    try { 
-        const response = await axios.get("http://ms-python:8000/network", {
-            headers: {
-                'x-api-key': process.env.SECURITY_TOKEN,
-            }
-        });
-        return res.status(200).json({ success: true, response: response.data })
-    } catch (err) {
-            return res.status(500).json({ success: false, message: "erreur", err })
+    try {
+        console.log(`[GET] /network -> ${PYTHON_API_URL}/network`);
+        const response = await axios.get(`${PYTHON_API_URL}/network`, { headers: pythonHeaders() });
+        return res.status(200).json({ success: true, response: response.data });
+    } catch (error) {
+        return handlePythonError(error, res);
     }
 });
 
 app.post("/simulate", async (req, res) => {
-    try { 
-        const response = await axios.post("http://ms-python:8000/simulate", req.body, {
-            headers: {
-                'x-api-key': process.env.SECURITY_TOKEN,
-            }
-        });
-        return res.status(200).json({ success: true, response: response.data })
-    } catch (err) {
-        return res.status(500).json({ success: false, message: "erreur", err })
+    try {
+        console.log(`[POST] /simulate -> ${PYTHON_API_URL}/simulate`, req.body);
+        const response = await axios.post(`${PYTHON_API_URL}/simulate`, req.body, { headers: pythonHeaders() });
+        return res.status(200).json({ success: true, response: response.data });
+    } catch (error) {
+        return handlePythonError(error, res);
     }
 });
 

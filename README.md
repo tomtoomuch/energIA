@@ -17,7 +17,7 @@ title: Architecture Prototyppe Moteur Prescriptif ENERGIA
 sequenceDiagram
     participant C as Client (Application Externe)
     participant G as Gateway Express (Passerelle A.P.I.)
-    participant P as Microservice Python (Flask Backend)
+    participant P as Microservice Python (FastAPI Backend)
     participant A as Algorithm Core (modélisation graph et scoring)
 
     C->>G: 1. Requête HTTP (Nécessité énergétique)
@@ -36,7 +36,8 @@ sequenceDiagram
     C'est le seul point d'entrée autorisé pour tout client externe. Elle gère le routage, la validation des requêtes et assure que les communications internes se font via un protocole strict vers le backend Python.
 
 * **Service Python (ms-python/):** le cœur de la logique métier.
-    Ce micro-service implémente l'ensemble des calculs complexes : modélisation du réseau, algorithmes de cheminement et d'optimisation. Il est construit en utilisant Flask pour exposer ses fonctionnalités via une API REST interne.
+    Ce micro-service implémente l'ensemble des calculs complexes : modélisation du réseau, algorithmes de cheminement et d'optimisation. 
+* Il est construit en utilisant FastAPI pour exposer ses fonctionnalités via une API REST interne.
 
 * **Moteur algorithmique (modélisation graph) : ** les traitements lourds
     **Modélisation :** Traitement des données du parc nucléaire (nodes/sommets = centrales, edges/arêtes = liaisons).

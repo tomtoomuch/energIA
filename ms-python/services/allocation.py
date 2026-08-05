@@ -7,6 +7,7 @@ except ImportError:
     from capacity import dispatchable_margin, ramp_limit
     from score import candidate_score
 
+
 def path_capacity(graph, path):
     # Capacité maximale de transfert (en MW)
     # la plus petite capacité parmi toutes les liaisons traversées
