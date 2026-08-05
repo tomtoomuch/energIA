@@ -2,9 +2,12 @@
 (le reste du graphe) pour donner, pour une région, TOUTES les centrales
 candidates avec leur distance et leurs pertes
 """
-
-from priority import local_plant_ids, external_entry_plant_ids
-from dijkstra import shortest_paths_from
+try:
+    from .priority import local_plant_ids, external_entry_plant_ids
+    from .dijkstra import shortest_paths_from
+except ImportError:
+    from priority import local_plant_ids, external_entry_plant_ids
+    from dijkstra import shortest_paths_from
 
 
 def region_candidates(graph, region):

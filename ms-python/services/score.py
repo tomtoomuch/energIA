@@ -1,6 +1,5 @@
 """
 Calcule le score d'une centrale candidate.
-
 La formule et les pondérations sont lues depuis le fichier JSON.
 Plus le score est faible, plus la centrale est intéressante.
 """
@@ -32,13 +31,10 @@ def candidate_score(
     score = (
         distance_km
         * simulation_parameters["distance_weight"]
-
         + loss_percent
         * simulation_parameters["loss_weight"]
-
         + (final_load_ratio ** 4)
         * simulation_parameters["saturation_weight"]
-
         + simulation["technical_penalty"]
         * simulation_parameters["technical_penalty_weight"]
     )
@@ -59,7 +55,7 @@ if __name__ == "__main__":
         build_regions_index
     )
     from candidates import region_candidates
-    from capacity import available_capacity
+    from capacity import dispatchable_margin
 
     # Chargement des données et construction des index.
     data = load_data()
@@ -77,14 +73,32 @@ if __name__ == "__main__":
     # pertes, chemin et statut local/externe.
     candidates = region_candidates(graph, occitanie)
 
+    # Exemple avec une centrale locale.
+    golfech = plants_index["golfech"]
+    golfech_candidate = candidates["golfech"]
+    golfech_margin = dispatchable_margin(golfech)
+    golfech_score = candidate_score(
+        plant=golfech,
+        distance_km=golfech_candidate["distance_km"],
+        loss_percent=golfech_candidate["loss_percent"],
+        allocated_mw=golfech_margin,
+        is_local=golfech_candidate["is_local"],
+        simulation_parameters=simulation_parameters
+    )
+    print("Centrale :", golfech["name"])
+    print("Chemin :", golfech_candidate["path"])
+    print("Distance :", golfech_candidate["distance_km"], "km")
+    print("Pertes estimées :", golfech_candidate["loss_percent"], "%")
+    print("Puissance mobilisable :", golfech_margin, "MW")
+    print("Est locale :", golfech_candidate["is_local"])
+    print("Score :", golfech_score)
+    print()
+
     # Exemple avec une centrale externe.
     plant_id = "tricastin"
     plant = plants_index[plant_id]
     candidate = candidates[plant_id]
-
-    # Quantité maximale que la centrale peut fournir.
-    allocated_mw = available_capacity(plant)
-
+    allocated_mw = dispatchable_margin(plant)
     score = candidate_score(
         plant=plant,
         distance_km=candidate["distance_km"],
@@ -93,7 +107,6 @@ if __name__ == "__main__":
         is_local=candidate["is_local"],
         simulation_parameters=simulation_parameters
     )
-
     print("Centrale :", plant["name"])
     print("Chemin :", candidate["path"])
     print("Distance :", candidate["distance_km"], "km")

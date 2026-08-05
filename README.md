@@ -16,7 +16,7 @@ title: Architecture Prototyppe Moteur Prescriptif ENERGIA
 sequenceDiagram
     participant C as Client (Application Externe)
     participant G as Gateway Express (Passerelle A.P.I.)
-    participant P as Microservice Python (Flask Backend)
+    participant P as Microservice Python (FastAPI Backend)
     participant A as Algorithm Core (modélisation graph et scoring)
 
     C->>G: 1. Requête HTTP (Nécessité énergétique)
@@ -35,7 +35,8 @@ sequenceDiagram
     C'est le seul point d'entrée autorisé pour tout client externe. Elle gère le routage, la validation des requêtes et assure que les communications internes se font via un protocole strict vers le backend Python.
 
 * **Service Python (ms-python/):** le cœur de la logique métier.
-    Ce micro-service implémente l'ensemble des calculs complexes : modélisation du réseau, algorithmes de cheminement et d'optimisation. Il est construit en utilisant Flask pour exposer ses fonctionnalités via une API REST interne.
+    Ce micro-service implémente l'ensemble des calculs complexes : modélisation du réseau, algorithmes de cheminement et d'optimisation. 
+* Il est construit en utilisant FastAPI pour exposer ses fonctionnalités via une API REST interne.
 
 * **Moteur algorithmique (modélisation graph) : ** les traitements lourds
     **Modélisation :** Traitement des données du parc nucléaire (nodes/sommets = centrales, edges/arêtes = liaisons).
@@ -133,6 +134,40 @@ centrales du pays. Elle ajoute chaque centrale trouvée à la liste des candidat
 si plusieurs points de départ permettent d'atteindre la même centrale, elle garde la distance la plus courte trouvée 
 (if plant_id not in candidates or info["distance_km"] < '...') — logique, on veut toujours comparer la meilleure option 
 disponible, pas une option au hasard.
+
+
+####  _ms-python/services/score.py
+Ce qui fait monter la note (donc rend une centrale moins intéressante) :
+
+Elle est loin → plus de km, plus la note monte.
+
+Elle a beaucoup de pertes sur le trajet → la note monte.
+
+Elle est déjà presque pleine (proche de sa limite) → la note monte beaucoup, parce qu'on met cette valeur à la puissance 4.
+Ça veut dire : une centrale à moitié pleine, ça va. Une centrale presque pleine, la note explose. C'est voulu — le brief
+demande justement d'éviter les centrales presque saturées.
+
+Elle a un problème technique → la note monte (rarement utilisé ici, presque toutes les centrales ont la même valeur).
+
+Ce qui fait baisser la note (donc rend une centrale plus intéressante) :
+
+Elle est locale (dans la région qui a besoin d'électricité) → on lui enlève 250 points d'un coup.
+
+####  _ms-python/services/allocation.py
+    Ce fichier décide, MW par MW, quelles centrales vont produire plus, et combien chacune — comme un responsable qui
+    distribue une commande entre plusieurs fournisseurs, en prenant toujours le meilleur d'abord.
+    Le principe on a une demande à couvrir (par exemple 1200 MW pour l'Occitanie).
+    On regarde toutes les centrales candidates, on donne un score à chacune (grâce à score.py),
+    et on choisit la meilleure. On lui donne le maximum qu'elle peut fournir — pas plus que sa marge, pas plus que sa 
+    vitesse de montée (rampe), et pas plus que ce que la liaison électrique peut transporter. Puis on regarde ce qu'il 
+    reste à couvrir, et on recommence avec les centrales restantes, jusqu'à ce que la demande soit entièrement couverte, 
+    ou qu'il n'y ait plus de centrale disponible.
+    
+    Les 3 plafonds qu'on ne dépasse jamais, à bien retenir : 
+        la marge de la centrale (elle ne peut pas produire plus que sa limite de sécurité), 
+        sa rampe (elle ne peut pas monter en puissance instantanément),
+        la capacité de la liaison empruntée
+
 ### Données utilisées
 
 Les données sont structurées autour des trois piliers suivants :

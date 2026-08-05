@@ -49,3 +49,25 @@ Prérequis, installation, configuration (.env), lancement, tests, routes, format
 
 Client → Gateway Express → Service Python (Flask) → Algorithme (graphe + Dijkstra + score).
 
+ms-python/services/ — le cœur algorithmique, chaque fichier a un seul rôle
+ git commit "
+graph_loader.py lit le JSON et construit le graphe (qui est voisin de qui).
+dijkstra.py calcule les chemins les plus courts entre centrales.
+capacity.py calcule combien de MW une centrale peut encore fournir.
+priority.py décide l'ordre de recherche (locale d'abord).
+candidates.py combine tout ça pour lister, pour une région donnée, toutes les centrales candidates avec leur distance et pertes.
+score.py calcule la note de chaque candidate (plus bas = meilleur).
+allocation.py est le chef d'orchestre : il répartit la demande MW par MW en choisissant à chaque tour la meilleure candidate.
+
+ms-python/tests/test_engine.py : les 5 tests unitaires qui vérifient que les briques essentielles ne cassent pas.
+"
+
+
+
+
+
+Rien de compliqué : juste un fichier HTML avec du CSS et du JavaScript "vanilla"
+— un seul fichier, gateway/public/index.html, servi directement par ta gateway Express.
+
+Pour la carte, j'ai utilisé Leaflet — une bibliothèque JavaScript légère et gratuite pour afficher des cartes interactives (fond de carte OpenStreetMap),
+ chargée depuis un CDN donc pas besoin de l'installer avec npm. Le JS fait juste des appels fetch() vers /plants, /regions et /simulate — les mêmes routes que ta gateway expose déjà, rien de nouveau côté backend à part deux lignes ajoutées dans index.js pour que la gateway serve ce fichier HTML.
