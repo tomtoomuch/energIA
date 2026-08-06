@@ -86,7 +86,7 @@ Afficher dans le terminal : requête reçue, réponse envoyée (dans la gateway)
 
 ## README
 
-[README.md](./README.md)
+[README.md](README.md)
 Prérequis, installation, configuration (.env), lancement, tests, routes, formats, algorithme, limites.
 
 ## Schéma d'architecture
