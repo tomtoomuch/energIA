@@ -49,5 +49,5 @@ def test_demande_non_satisfaisable(self):
     result = allocate(region, 300, self.graph, self.plants_index, self.simulation_parameters)
     self.assertFalse(result["fully_satisfied"])
     self.assertGreater(result["missing_mw"], 0)
-if name == "main":
+if __name__ == "__main__":
     unittest.main()
