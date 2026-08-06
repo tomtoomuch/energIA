@@ -205,9 +205,8 @@ Le moteur reçoit une région et une demande en MW, et répond en 4 étapes :
 1. D'abord il regarde les centrales locales de la région (priority.py) — elles sont examinées en premier, comme demandé par le brief. Si elles ne suffisent pas, il explore le reste du réseau national avec Dijkstra (dijkstra.py), pour connaître la distance et les pertes vers chaque autre centrale accessible.
 2. Ensuite chaque centrale candidate reçoit une note (score.py) qui combine distance, pertes, saturation et priorité régionale.
 3. Enfin, allocation.py répartit la demande petit à petit :
- * à chaque tour, il prend la centrale avec la meilleure note, lui donne le maximum qu'elle peut fournir (plafonné par sa marge, sa vitesse de montée en puissance, et la capacité de la liaison empruntée),
- 
- * puis recommence avec ce qu'il reste à couvrir - jusqu'à ce que la demande soit entièrement satisfaite, ou qu'il n'y ait plus aucune centrale disponible.
+    - à chaque tour, il prend la centrale avec la meilleure note, lui donne le maximum qu'elle peut fournir (plafonné par sa marge, sa vitesse de montée en puissance, et la capacité de la liaison empruntée),
+    - puis recommence avec ce qu'il reste à couvrir - jusqu'à ce que la demande soit entièrement satisfaite, ou qu'il n'y ait plus aucune centrale disponible.
 
 ##### Formule d'attribution de score
 
@@ -225,11 +224,11 @@ Tous ces poids ne sont pas choisis au hasard : ils sont lus directement depuis _
 
 Ce fichier transforme les données brutes du JSON (centrales, liaisons) en une structure que le programme peut utiliser facilement pour calculer des chemins - un graphe
 
-* **load_data(path) :** ouvre le fichier JSON et le transforme en dictionnaire Python. Rien de plus qu'une lecture de fichier.
+- **load_data(path) :** ouvre le fichier JSON et le transforme en dictionnaire Python. Rien de plus qu'une lecture de fichier.
 
-* **build_graph(data) :** c'est la partie importante. Elle prend les liaisons du JSON (_plant_edges_) et construit un dictionnaire où chaque centrale connaît la liste de ses voisins directs, avec pour chacun la distance, les pertes, et la capacité de la liaison. Comme chaque liaison va dans les deux sens, elle l'ajoute deux fois (une fois pour chaque centrale concernée) - sinon on pourrait aller de A vers B mais pas l'inverse.
+- **build_graph(data) :** c'est la partie importante. Elle prend les liaisons du JSON (_plant_edges_) et construit un dictionnaire où chaque centrale connaît la liste de ses voisins directs, avec pour chacun la distance, les pertes, et la capacité de la liaison. Comme chaque liaison va dans les deux sens, elle l'ajoute deux fois (une fois pour chaque centrale concernée) - sinon on pourrait aller de A vers B mais pas l'inverse.
 
-* **build_plants_index(data)** et **build_regions_index(data) :** deux dictionnaires bonus, pour retrouver rapidement les infos complètes d'une centrale ou d'une région à partir de son identifiant, sans reparcourir toute la liste à chaque fois. Utile pour les étapes suivantes (calcul de marge, priorité locale).
+- **build_plants_index(data)** et **build_regions_index(data) :** deux dictionnaires bonus, pour retrouver rapidement les infos complètes d'une centrale ou d'une région à partir de son identifiant, sans reparcourir toute la liste à chaque fois. Utile pour les étapes suivantes (calcul de marge, priorité locale).
 
 >Ce fichier n'intègre ni FastAPI ni les routes HTTP - il ne fait que manipuler des données, dans le respect du principe de séparation des responsabilités. C'est ce que le brief demande ("le code algorithmique séparé des routes HTTP"), et ça permet de le tester tout seul, sans lancer le serveur.
 >
@@ -317,18 +316,18 @@ Notre logique veut que nous comparions la meilleure option disponible, pas une o
 
 Script attribue un score à chaque centrale en fonction du point de départ. Plus le score d'un nœud est bas, plus ce nœud est intéressant comme étape dans le chemin.
 
-**Eléments impactant le score à la hausse**
+###### Eléments impactant le score à la hausse
 
-* Une **distance** trop importante impacte fortement la note → plus il y a de km de distance, plus le score est élevée.
-* Les **déperditions de puissance** entraîne une forte hausse du score, elles sont liées à la distance.
-* La **fourniture possible** est trop proche de sa limite → le score monte beaucoup, parce qu'on met cette valeur à la puissance 4.
-* Un **problème technique**, plus rare dans le cas qui nous occupe.
+- Une **distance** trop importante impacte fortement la note → plus il y a de km de distance, plus le score est élevée.
+- Les **déperditions de puissance** entraîne une forte hausse du score, elles sont liées à la distance.
+- La **fourniture possible** est trop proche de sa limite → le score monte beaucoup, parce qu'on met cette valeur à la puissance 4.
+- Un **problème technique**, plus rare dans le cas qui nous occupe.
 
 _Le brief demande justement d'éviter les centrales presque saturées._
 
-**Eléments impactant le score à la baisse**
+###### Eléments impactant le score à la baisse
 
-* Une **distance** faible, si la centrale se trouve dans la région demandeuse → on enlève 250 points à son score.
+- Une **distance** faible, si la centrale se trouve dans la région demandeuse → on enlève 250 points à son score.
 
 ##### ms-python/services/**allocation.py**
 
@@ -373,38 +372,56 @@ Le plus petit score indique la candidate la plus performante pour répondre au b
 
 Le système doit être robuste et le test des comportements suivants est crucial :
 
-* Satisfaction totale ou partielle de la demande énergétique simulée
-* Calcul précis de la capacité disponible en cas de contrainte technique
-* Scénario d'absence de chemin viable (connectivité rompue)
-* Chemin simple Dijkstra fonctionnel
+- Satisfaction totale ou partielle de la demande énergétique simulée
+- Calcul précis de la capacité disponible en cas de contrainte technique
+- Scénario d'absence de chemin viable (connectivité rompue)
+- Chemin simple Dijkstra fonctionnel
+
+Pour lancer les tests unitaires sur le micro-service Python :
+
+1. Ouvrez un Terminal depuis le dossier du projet, puis entrez dans le dossier du micro-service
+
+    ```bash
+        cd ms-python/
+    ```
+
+2. Lancer les tests unitaires
+
+    ```bash
+        python -m unittest discover -s tests -v 2> rapport_tests.txt
+    ```
+
+3. Le résultat des 5 tests unitaires prévus s'écrit dans le fichier ```rapport_tests.txt```.
 
 ## Démarrage et utilisation
 
 ### Prérequis techniques
 
-* **Python :** les dépendances spécifiques sont listées dans ms-python/requirements.txt.
-* **Node.js :** la passerelle d'API requiert un environnement Node.js actif.
+- **Python :** les dépendances spécifiques sont listées dans ms-python/requirements.txt.
+- **Node.js :** la passerelle d'API requiert un environnement Node.js actif.
 
 ### Lancement de l'environnement (via Docker)
 
 L'environnement complet est géré via le fichier docker-compose.yml à la racine :
-```docker compose up --build```
+    ```bash
+    docker compose up --build
+    ```
 
 **Ce processus lance simultanément :**
 
-* Le micro-service Python (ms-python) écoutant sur le port 8000 (interne).
-* La passerelle Node.js (gateway) écoutant sur le port 3000 (externe).
+- Le micro-service Python (ms-python) écoutant sur le port 8000 (interne).
+- La passerelle Node.js (gateway) écoutant sur le port 3000 (externe).
 
 ### Terminaisons _(Endpoints)_ de l'API  exposé(e)s
 
-| Service       | Endpoint  | Méthode  | Description   |
+| Service                   | Endpoint  | Méthode  | Description                                                   |
 | ------------------------- | --------- | -------- | ------------------------------------------------------------- |
-| Gateway Express - HTML UI | /         | GET/POST | Point d'entrée client pour toute simulation       |
-| ms Python     | /plants   | GET      | Récupère la liste de toutes les centrales du parc |
-| ms Python     | /regions  | GET      | Liste des régions géographiques couvertes         |
-| ms Python     | /network  | GET      | Détails structurels et topologiques du réseau     |
-| ms Python     | /simulate | POST     | Endpoint principal. Reçoit un besoin énergétique et déclenche |
+| Gateway Express - HTML UI | /         | GET/POST | Point d'entrée client pour toute simulation                   |
+| ms Python                 | /plants   | GET      | Récupère la liste de toutes les centrales du parc             |
+| ms Python                 | /regions  | GET      | Liste des régions géographiques couvertes                     |
+| ms Python                 | /network  | GET      | Détails structurels et topologiques du réseau                 |
+| ms Python                 | /simulate | POST     | Endpoint principal. Reçoit un besoin énergétique et déclenche |
 
 **Important :**
-Le client ne doit jamais communiquer directement avec le service Python.
+Le client ne doit **jamais** communiquer directement avec le service Python.
 Toute interaction doit passer par la Gateway Express (port 3000).

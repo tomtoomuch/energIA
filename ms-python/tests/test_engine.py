@@ -6,30 +6,29 @@ from services.allocation import allocate
 
 class TestDijkstra(unittest.TestCase):
     @classmethod
-
     def setUpClass(cls):
         cls.data = load_data()
         cls.graph = build_graph(cls.data)
 
-def test_chemin_simple_existe(self):
-    path, distance = dijkstra(self.graph, "golfech", "nogent")
-    self.assertIsNotNone(path)
-    self.assertEqual(path[0], "golfech")
-    self.assertEqual(path[-1], "nogent")
-    self.assertGreater(distance, 0)
+    def test_chemin_simple_existe(self):
+        path, distance = dijkstra(self.graph, "golfech", "nogent")
+        self.assertIsNotNone(path)
+        self.assertEqual(path[0], "golfech")
+        self.assertEqual(path[-1], "nogent")
+        self.assertGreater(distance, 0)
 
-def test_absence_de_chemin(self):
-    mini_graph = {"a": [], "b": []}
-    path, distance = dijkstra(mini_graph, "a", "b")
-    self.assertIsNone(path)
-    self.assertIsNone(distance)
+    def test_absence_de_chemin(self):
+        mini_graph = {"a": [], "b": []}
+        path, distance = dijkstra(mini_graph, "a", "b")
+        self.assertIsNone(path)
+        self.assertIsNone(distance)
 
 class TestCapacity(unittest.TestCase):
     @classmethod
-
     def setUpClass(cls):
         cls.data = load_data()
         cls.plants_index = build_plants_index(cls.data)
+
     def test_calcul_marge_disponible(self):
         plant = self.plants_index["golfech"]
         margin = dispatchable_margin(plant)
@@ -38,7 +37,6 @@ class TestCapacity(unittest.TestCase):
 
 class TestAllocation(unittest.TestCase):
     @classmethod
-
     def setUpClass(cls):
         cls.data = load_data()
         cls.graph = build_graph(cls.data)
@@ -59,4 +57,5 @@ class TestAllocation(unittest.TestCase):
         self.assertGreater(result["missing_mw"], 0)
 
 if __name__ == "__main__":
+
     unittest.main()
