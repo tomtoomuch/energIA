@@ -9,3 +9,4 @@ ms-python/app/__pycache__/__init__.cpython-311.pyc
 ms-python/app/__pycache__/main.cpython-311.pyc
 ms-python/__pycache__/main.cpython-311.pyc
 ms-python/data/parc-nucleaire-prescriptif-france.json
+tests/__pycache__/**
