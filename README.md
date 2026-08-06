@@ -4,9 +4,30 @@ Ce projet est une intervention complète visant à moderniser le système d'aide
 
 ## Table des matières
 
-[Architecture globale](#architecture-globale)
-
-
+- [[#Architecture globale|Architecture globale]]
+	- [[#Architecture globale#Schéma de flux séquentiel|Schéma de flux séquentiel]]
+	- [[#Architecture globale#Arborescence projet|Arborescence projet]]
+- [[#Application|Application]]
+	- [[#Application#Routes|Routes]]
+		- [[#Routes#**Routes de monitoring**|**Routes de monitoring**]]
+		- [[#Routes#**Routes d'opérations**|**Routes d'opérations**]]
+	- [[#Application#Composants techniques principaux|Composants techniques principaux]]
+		- [[#Composants techniques principaux#Fonctionnement du moteur prescriptif|Fonctionnement du moteur prescriptif]]
+			- [[#Fonctionnement du moteur prescriptif#Formule d'attribution de score|Formule d'attribution de score]]
+			- [[#Fonctionnement du moteur prescriptif#ms-python/services/**graph_loader.py**|ms-python/services/**graph_loader.py**]]
+			- [[#Fonctionnement du moteur prescriptif#ms-python/services/**dijkstra.py**|ms-python/services/**dijkstra.py**]]
+			- [[#Fonctionnement du moteur prescriptif#ms-python/services/**capacity.py**|ms-python/services/**capacity.py**]]
+			- [[#Fonctionnement du moteur prescriptif#ms-python/services/**priority.py**|ms-python/services/**priority.py**]]
+			- [[#Fonctionnement du moteur prescriptif#ms-python/services/**candidates.py**|ms-python/services/**candidates.py**]]
+			- [[#Fonctionnement du moteur prescriptif#ms-python/services/**score.py**|ms-python/services/**score.py**]]
+			- [[#Fonctionnement du moteur prescriptif#ms-python/services/**allocation.py**|ms-python/services/**allocation.py**]]
+	- [[#Application#Données utilisées|Données utilisées]]
+	- [[#Application#Méthodologie algorithmique détaillée|Méthodologie algorithmique détaillée]]
+	- [[#Application#Tests Unitaires|Tests Unitaires]]
+- [[#Démarrage et utilisation|Démarrage et utilisation]]
+	- [[#Démarrage et utilisation#Prérequis techniques|Prérequis techniques]]
+	- [[#Démarrage et utilisation#Lancement de l'environnement (via Docker)|Lancement de l'environnement (via Docker)]]
+	- [[#Démarrage et utilisation#Terminaisons _(Endpoints)_ de l'API  exposé(e)s|Terminaisons _(Endpoints)_ de l'API  exposé(e)s]]
 
 ## Architecture globale
 
@@ -38,71 +59,126 @@ G-->>C: 6. Retour à l'utilisateur final.
 
 ### Arborescence projet
 
-
+```mermaid
+---
+config:
+  layout: tree
+title: Arborescence Prototyppe Moteur Prescriptif ENERGIA
+---
+treeView-beta
+".env"
+    "CONTRIBUTING.md"
+"README.md"
+"docker-compose.override.yml"
+"docker-compose.yml"
+"docs/"
+    "brief/"
+    "feuille_de_route.md"
+    "etapes.txt"
+"gateway/"
+    "Dockerfile"
+    "index.js"
+    "node_modules/"
+    "package.json"
+    "public/"
+        "index.html"
+"ms-python/"
+    "dockerfile"
+    "main.py"
+    "requirements.txt"
+    "data/"
+        "parc_nucleaire_prescriptif_france.json"
+    "services/"
+        "allocation.py"
+        "candidates.py"
+        "capacity.py"
+        "dijkstra.py"
+        "dispatch.py"
+        "graph_loader.py"
+        "priority.py"
+        "score.py"
+        "tests/"
+            "test-engine.py"
+```
 
 ## Application
 
 ### Routes
 
 Notre API expose 6 routes sur la passerelle (_gateway_) qui écoute le port 3000.
+Les routes sont documentées ci-dessous.
+Par ailleurs, vous pouvez trouver la [documentation générée avec Bruno](./docs/Tests-EnergIA-documentation.html "Documentation générée par Bruno sur les tests de routes de notre API") après avoir tester le fonctionnement des différentes routes exposées.
+De plus, FastAPI documente automatiquement les routes exposées via openAPI et [cette documentation sur une page html](http://localhost:8000/docs").
 
 #### **Routes de monitoring**
-#### GET /health
-GET http://localhost:3000/health
+
+##### GET /health
+
+GET <http://localhost:3000/health>
+
 Interroge le serveur passerelle et vérifie son fonctionnement.
-#### GET /health-ms
-GET http://localhost:3000/health-ms
+
+##### GET /health-ms
+
+GET <http://localhost:3000/health-ms>
+
 Interroge le serveur python/FastAPI (port 8000) sur son _endpoint_ /health via la passerelle et répond au client via la passerelle également et vérifie son fonctionnement.
 <!-- AMELIORATION : Prévoir d'afficher un·e page/onglet/surcouche modale qui affiche l'état du réseau et de ses éléments. On peu y ajouter les métriques des conteneurs -->
 
 #### **Routes d'opérations**
 
-GET http://localhost:3000/plants
+GET <http://localhost:3000/plants>
+
 Envoie une requête au micro-service du moteur prescriptif pour extraire et traiter les données pour afficher la liste des centrales électriques du parc nucléaire français métropolitain.
 
-GET http://localhost:3000/regions
+GET <http://localhost:3000/regions>
+
 Envoie une requête au micro-service du moteur prescriptif pour extraire et traiter les données pour afficher la liste des régions nomenclaturés, du parc français nucléaire métropolitain.
 
-GET http://localhost:3000/network <!-- grid serait plus juste -->
+GET <http://localhost:3000/network> <!-- grid serait plus juste -->
+
 Envoie une requête au micro-service du moteur prescriptif pour extraire et traiter les données qui servent à fabriquer le modèle en _graph_ pour afficher le réseau des centrales du parc nucléaire français.
 
-POST http://localhost:3000/simulate
-Envoie une requête au micro-service du moteur prescriptif pour lancer l'exécution des scripts du moteur prescriptif.
+POST <http://localhost:3000/simulate>
+
+Envoie une requête au micro-service du moteur prescriptif pour lancer l'exécution des scripts du moteur prescriptif qui simule unen demande liée à une hausse de consommation d'une région.
+
 ```json
 body: {
-	"region": "occitanie",
-	"additional_demand_mw": 500
+ "region": "occitanie",
+ "additional_demand_mw": 500
 }
 ```
-
 
 Port 8000 (service Python direct) — réservé au debug uniquement, pas pour l'usage normal :
 
-GET http://localhost:8000/health (pas de clé nécessaire)
+GET <http://localhost:8000/health> (pas de clé nécessaire)
 
-GET http://localhost:8000/plants -H "X-Api-Key: <SECURITY_TOKEN>"
+GET <http://localhost:8000/plants> -H "X-Api-Key: <SECURITY_TOKEN>"
 
 Le format des réponses json
+
 ```json
 { 
-	"success": true,
-	"response": {
-		"allocations": [
-			{
-				"plant_id": "golfech",
-				"allocated_mw": 89.0,
-				"final_load_ratio": 0.95,
-				"path": ["golfech"],
-				"distance_km": 0.0,
-				"loss_percent": 0.0,
-				"score": -160.02
-			}
-		],
-		"missing_mw": 0.0,
-		"fully_satisfied": true
-	}
+ "success": true,
+ "response": {
+  "allocations": [
+   {
+    "plant_id": "golfech",
+    "allocated_mw": 89.0,
+    "final_load_ratio": 0.95,
+    "path": ["golfech"],
+    "distance_km": 0.0,
+    "loss_percent": 0.0,
+    "score": -160.02
+   }
+  ],
+  "missing_mw": 0.0,
+  "fully_satisfied": true
+ }
 }
 ```
+
 ### Composants techniques principaux
 
 * **Gateway Express (gateway/) :** la passerelle API (NodeJS/Express).
@@ -119,14 +195,16 @@ Ce micro-service implémente l'ensemble des calculs complexes : modélisation du
 #### Fonctionnement du moteur prescriptif
 
 Le moteur reçoit une région et une demande en MW, et répond en 4 étapes :
+
 1. D'abord il regarde les centrales locales de la région (priority.py) — elles sont examinées en premier, comme demandé par le brief. Si elles ne suffisent pas, il explore le reste du réseau national avec Dijkstra (dijkstra.py), pour connaître la distance et les pertes vers chaque autre centrale accessible.
 2. Ensuite chaque centrale candidate reçoit une note (score.py) qui combine distance, pertes, saturation et priorité régionale.
 3. Enfin, allocation.py répartit la demande petit à petit :
-	* à chaque tour, il prend la centrale avec la meilleure note, lui donne le maximum qu'elle peut fournir (plafonné par sa marge, sa vitesse de montée en puissance, et la capacité de la liaison empruntée),
-	
-	* puis recommence avec ce qu'il reste à couvrir - jusqu'à ce que la demande soit entièrement satisfaite, ou qu'il n'y ait plus aucune centrale disponible.
+ * à chaque tour, il prend la centrale avec la meilleure note, lui donne le maximum qu'elle peut fournir (plafonné par sa marge, sa vitesse de montée en puissance, et la capacité de la liaison empruntée),
+ 
+ * puis recommence avec ce qu'il reste à couvrir - jusqu'à ce que la demande soit entièrement satisfaite, ou qu'il n'y ait plus aucune centrale disponible.
 
 ##### Formule d'attribution de score
+
 ```py
 score = distance_km × 1.0 + pertes_% × 45.0 + (taux_de_charge_final ^ 4) × 900.0 + pénalité_technique × 200.0 − 250[^1]
 ```
@@ -136,6 +214,7 @@ Le taux de charge final est élevé à la puissance 4 délibérément : ça rest
 Le bonus régional (-250) fait qu'une centrale locale part avec un avantage qu'une distance ou des pertes modérées ne suffisent généralement pas à compenser
 Les centrales de la région sont donc presque toujours choisies en premier, sauf si elles sont vraiment trop saturées.
 Tous ces poids ne sont pas choisis au hasard : ils sont lus directement depuis _simulation_parameters_ dans le [JSON fourni par le brief](./data/parc_nucleaire_prescriptif_france.json "Fichier de données fourni pour lel travail de prototypagee").
+
 ##### ms-python/services/**graph_loader.py**
 
 Ce fichier transforme les données brutes du JSON (centrales, liaisons) en une structure que le programme peut utiliser facilement pour calculer des chemins - un graphe
@@ -148,11 +227,11 @@ Ce fichier transforme les données brutes du JSON (centrales, liaisons) en une s
 
 >Ce fichier n'intègre ni FastAPI ni les routes HTTP - il ne fait que manipuler des données, dans le respect du principe de séparation des responsabilités. C'est ce que le brief demande ("le code algorithmique séparé des routes HTTP"), et ça permet de le tester tout seul, sans lancer le serveur.
 >
->Pour tester, lancer un terminal et appeler : 
+>Pour tester, lancer un terminal et appeler :
 
-	```bash
-	python graph_loader.py
-	```
+ ```bash
+ python graph_loader.py
+ ```
 
 ##### ms-python/services/**dijkstra.py**
 
@@ -164,12 +243,12 @@ Ce fichier trouve le chemin le moins cher (_ou chemin le plus court_) entre deux
 4. On répète ça jusqu'à avoir atteint la centrale d'arrivée, ou jusqu'à ne plus pouvoir avancer.
 
 **3 variables à connaître**
-	**distances :** la meilleure distance connue jusqu'ici pour chaque centrale.
-	**previous :** par quelle centrale on est passé juste avant, pour pouvoir reconstruire le chemin  complet à la fin (sinon on connaît juste la distance, pas le trajet).
-	**visited :** les centrales déjà "réglées", pour ne pas repasser dessus inutilement.
+ **distances :** la meilleure distance connue jusqu'ici pour chaque centrale.
+ **previous :** par quelle centrale on est passé juste avant, pour pouvoir reconstruire le chemin  complet à la fin (sinon on connaît juste la distance, pas le trajet).
+ **visited :** les centrales déjà "réglées", pour ne pas repasser dessus inutilement.
 
 **1 fonction**
-	**shortest_paths_from :** au lieu de chercher le chemin vers une seule centrale, cette fonction calcule d'un coup le chemin le plus court vers toutes les centrales atteignables depuis un point de départ
+ **shortest_paths_from :** au lieu de chercher le chemin vers une seule centrale, cette fonction calcule d'un coup le chemin le plus court vers toutes les centrales atteignables depuis un point de départ
 
 ##### ms-python/services/**capacity.py**
 
@@ -198,13 +277,16 @@ d'abord chez elle, ensuite les voisines les plus évidentes.
 **candidate_search_order(region) :** la fonction la plus importante ici. Elle assemble les deux listes précédentes, dans l'ordre (locale d'abord, externe ensuite), et retire les doublons si jamais une centrale apparaissait dans les deux listes. Résultat : une seule liste, dans le bon ordre de priorité, prête à être utilisée par la suite (calcul du score, répartition).
 
 Le bloc de point d'entrée contient actuellement un test à la main sur deux régions différentes.
+
 ```py
-	if __name__ == "__main__"
+ if __name__ == "__main__"
 ```
+
 Pour l'Occitanie, qui a Golfech comme unique centrale locale, l'ordre doit être \['golfech', 'tricastin', 'cruas', 'saint_alban'].
 Pour l'Île-de-France, qui n'a aucune centrale locale (regarde _local_plant_ids: \[]_ dans le JSON), l'ordre de recherche commence directement par les centrales externes \['nogent', 'dampierre', 'saint_laurent']. C'est un aspect fondamental du brief : certaines régions n'ont pas de centrale sur leur territoire, il faut quand même pouvoir répondre à la demande des populations.
 
 ##### ms-python/services/**candidates.py**
+
 Ce fichier donne, pour une région donnée, la liste complète des centrales candidates avec leur distance et leurs pertes - en combinant les centrales locales, les centrales d'entrée externes, et le reste du graphe si besoin. Avant, nous exécutions deux briques séparées mais aucune ne suffisait seule. **priority.py** savait dire _"regarde d'abord les centrales locales, puis les externes"_ - mais s'arrêtait là, sans jamais chercher plus loin dans le réseau si ces deux
 listes ne suffisaient pas. dijkstra.py savait calculer des distances et des chemins, mais seulement si on lui donnait déjà un point de départ et une cible précise.
 **candidates.py** relie les deux : il utilise **priority.py** pour savoir par où
@@ -213,14 +295,16 @@ commencer, et _dijkstra.shortest_paths_from_ pour explorer tout le reste du grap
 **La fonction region_candidates**
 D'abord, elle prend toutes les centrales locales de la région et leur donne une distance de 0 et des pertes de 0 - notre logique veut que comme elles sont déjà sur place, pas besoin de les transporter sur le réseau.
 
-Ensuite, elle détermine les "points de départ" (_anchors_) pour explorer le reste du graphe : 
+Ensuite, elle détermine les "points de départ" (_anchors_) pour explorer le reste du graphe :
 les centrales locales de la région si elle en a, sinon ses centrales d'entrée externes
 (cas d'une région comme l'Île-de-France, qui n'a aucune centrale chez elle).
 
 Pour chaque point de départ, elle lance **shortest_paths_from** - qui donne d'un coup la distance vers toutes les autres centrales du pays. Elle ajoute chaque centrale trouvée à la liste des candidates, avec sa distance et ses pertes. Si plusieurs points de départ permettent d'atteindre la même centrale, elle garde la distance la plus courte trouvée.
+
 ```py
 if plant_id not in candidates or info["distance_km"] < '...':
 ```
+
 Notre logique veut que nous comparions la meilleure option disponible, pas une option au hasard.
 
 ##### ms-python/services/**score.py**
@@ -228,6 +312,7 @@ Notre logique veut que nous comparions la meilleure option disponible, pas une o
 Script attribue un score à chaque centrale en fonction du point de départ. Plus le score d'un nœud est bas, plus ce nœud est intéressant comme étape dans le chemin.
 
 **Eléments impactant le score à la hausse**
+
 * Une **distance** trop importante impacte fortement la note → plus il y a de km de distance, plus le score est élevée.
 * Les **déperditions de puissance** entraîne une forte hausse du score, elles sont liées à la distance.
 * La **fourniture possible** est trop proche de sa limite → le score monte beaucoup, parce qu'on met cette valeur à la puissance 4.
@@ -236,6 +321,7 @@ Script attribue un score à chaque centrale en fonction du point de départ. Plu
 _Le brief demande justement d'éviter les centrales presque saturées._
 
 **Eléments impactant le score à la baisse**
+
 * Une **distance** faible, si la centrale se trouve dans la région demandeuse → on enlève 250 points à son score.
 
 ##### ms-python/services/**allocation.py**
@@ -245,8 +331,9 @@ Le script prend en entrée une demande d'énergie électrique à couvrir (par ex
 On regarde toutes les centrales candidates, on donne un score à chacune (grâce à score.py),
 et on choisit la meilleure. On lui donne le maximum qu'elle peut fournir - pas plus que sa marge, ni plus que sa vitesse de montée en puissance (_ramp_), et pas plus que ce que la liaison électrique peut transporter. Puis on regarde ce qu'il reste à couvrir, et on recommence avec les centrales restantes, jusqu'à ce que la demande soit entièrement couverte, ou qu'il n'y ait plus de centrale disponible.
 
-Les **3 plafonds** qu'on ne dépasse jamais, à bien retenir : 
-* la marge de la centrale (elle ne peut pas produire plus que sa limite de sécurité), 
+Les **3 plafonds** qu'on ne dépasse jamais, à bien retenir :
+
+* la marge de la centrale (elle ne peut pas produire plus que sa limite de sécurité),
 * la montée en puissance, ou _ramp_ in english (elle ne peut pas monter en puissance instantanément),
 * la capacité de la liaison empruntée
 
@@ -265,9 +352,11 @@ L'algorithme principal est une cascade séquentielle de calculs visant à produi
 **Priorisation des sources :** La recherche priorise toujours les centrales locales (dans la région qui demande) avant d'explorer tout le graphe en respectant l'algorithme de Dijkstra, garantissant une logique opérationnelle terrain.
 
 **Calcul du score global :** Chaque centrale candidate reçoit un score composite pour évaluer son rôle dans la réponse énergétique :
+
 ```py
 text{Score} = (\text{Distance}_{\text{km}} \times 1.0) + (\text{Pertes}_{\%} \times 45.0) + ((\text{Taux de Charge Final})^4 \times 900.0) + \text{Pénalité technique} \times 200.0 - [250 \text{ si centrale locale}
 ```
+
 Le plus petit score indique la candidate la plus performante pour répondre au besoin global.
 
 **Répartition de la demande :** Les candidates sont triées par **ordre croissant de leur score**. La demande est ensuite distribuée séquentiellement à chaque centrale, en respectant sa marge disponible (sans dépasser ni le plafond ni les limites des liaisons).
@@ -302,16 +391,14 @@ L'environnement complet est géré via le fichier docker-compose.yml à la racin
 
 ### Terminaisons _(Endpoints)_ de l'API  exposé(e)s
 
-| Service                   | Endpoint  | Méthode  | Description                                                   |
+| Service       | Endpoint  | Méthode  | Description   |
 | ------------------------- | --------- | -------- | ------------------------------------------------------------- |
-| Gateway Express - HTML UI | /         | GET/POST | Point d'entrée client pour toute simulation                   |
-| ms Python                 | /plants   | GET      | Récupère la liste de toutes les centrales du parc             |
-| ms Python                 | /regions  | GET      | Liste des régions géographiques couvertes                     |
-| ms Python                 | /network  | GET      | Détails structurels et topologiques du réseau                 |
-| ms Python                 | /simulate | POST     | Endpoint principal. Reçoit un besoin énergétique et déclenche |
+| Gateway Express - HTML UI | /         | GET/POST | Point d'entrée client pour toute simulation       |
+| ms Python     | /plants   | GET      | Récupère la liste de toutes les centrales du parc |
+| ms Python     | /regions  | GET      | Liste des régions géographiques couvertes         |
+| ms Python     | /network  | GET      | Détails structurels et topologiques du réseau     |
+| ms Python     | /simulate | POST     | Endpoint principal. Reçoit un besoin énergétique et déclenche |
 
 **Important :**
 Le client ne doit jamais communiquer directement avec le service Python.
 Toute interaction doit passer par la Gateway Express (port 3000).
-
-[^1]: si la centrale est locale
