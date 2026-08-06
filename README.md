@@ -101,6 +101,12 @@ treeView-beta
             "test-engine.py"
 ```
 
+Dépôt GitHub : https://github.com/tomtoomuch/energIA
+
+Image de la passerelle : https://hub.docker.com/r/tomtoomuch/energia-gateway
+
+Image du micro-service 'Moteur prescriptif' : https://hub.docker.com/r/tomtoomuch/energia-ms-python
+
 ## Application
 
 ### Routes
